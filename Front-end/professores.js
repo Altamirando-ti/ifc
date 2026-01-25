@@ -1,3 +1,9 @@
+//const { response } = require("express");
+
+// let professores = [
+//     {codigo:1, nomeProfessor:'Paulo', emailProfessor: 'paulo.ifc@email'},
+//     {codigo:2, nomeProfessor:'Beto', emailProfessor: 'beto.ifc@email'}
+// ];
 let currentProfessorId = null;
 
 function openModal(modalId){
@@ -34,9 +40,8 @@ function renderProfessores(){
         professores.forEach((professor, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${professor.codigo}</td>
-            <td>${professor.nomeprofessor}</td>
-            <td>${professor.emailprofessor}</td>
+            <td>${professor.nomeProfessor}</td>
+            <td>${professor.emailProfessor}</td>
             <td>
                 <button onclick = "editProfessor(${index})">Editar</button>
                 <button onclick = "deleteProfessor(${index})">Excluir</button>
@@ -47,6 +52,22 @@ function renderProfessores(){
     })
 }
 
+function editProfessor(index){
+    const professor = professores[index];
+    document.getElementById('codigo').value = professor.codigo;
+    document.getElementById('nomeProfessor').value = professor.nomeProfessor;
+    document.getElementById('emailProfessor').value = professor.emailProfessor;
+    currentProfessorId = index;
+    openModal('professorModal');
+}
+
+function deleteProfessor(index){
+    if (confirm('Tem certeza que deseja excluir este professor?')){
+        professores.splice(index,1);
+        renderProfessores();
+    }
+}
+
 //Função addProfessor pelo método get
 // function addProfessor(codigo, nomeProfessor, emailProfessor){
 //     professores.push({codigo, nomeProfessor, emailProfessor});
@@ -55,6 +76,7 @@ function renderProfessores(){
 
 //Função addProfessor pelo método post
 function addProfessor(codigo, nomeProfessor, emailProfessor){
+    // professores.push({codigo, nomeProfessor, emailProfessor});
     let professor = {codigo, nomeProfessor, emailProfessor}
     console.log(professor)
     fetch('http://localhost:3000/professores',
@@ -70,40 +92,15 @@ function addProfessor(codigo, nomeProfessor, emailProfessor){
     renderProfessores();
 }
 
-
-// function editProfessor(index){
-//     const professor = professores[index];
-//     document.getElementById('codigo').value = professor.codigo;
-//     document.getElementById('nomeProfessor').value = professor.nomeProfessor;
-//     document.getElementById('emailProfessor').value = professor.emailProfessor;
-//     currentProfessorId = index;
-//     openModal('professorModal');
-// }
-
-function updateProfessor(codigo, nomeProfessor, emailProfessor){
-    let professor = {codigo, nomeProfessor, emailProfessor}
-    //pit
-    fetch('http://localhost:3000/professores'+codigo,
-        {
-            method:'PUT',
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(professor)
-        })
-        .then(response => response.json())
-        .then(dados =>{
-            console.log(dados)
-        })
-    renderProfessores();
-}
-
 const professorForm = document.getElementById('professorForm');
 professorForm.addEventListener('submit',function(e){
     e.preventDefault();
-    const codigo = document.getElementById('codigoProfessor').value;
+    const codigo = document.getElementById('codigo').value;
     const nomeProfessor = document.getElementById('nomeProfessor').value;
     const emailProfessor = document.getElementById('emailProfessor').value;
+    //inclusão ou alteração
     if(currentProfessorId !== null){
-        updateProfessor(codigo, nomeProfessor, emailProfessor)
+        professores[currentProfessorId] = {codigo, nomeProfessor, emailProfessor}
     }else{
         addProfessor(codigo, nomeProfessor, emailProfessor);
     }
@@ -111,25 +108,4 @@ professorForm.addEventListener('submit',function(e){
     renderProfessores();
 });
 
-// function deleteProfessor(index){
-//     if (confirm('Tem certeza que deseja excluir este professor?')){
-//         professores.splice(index,1);
-//         renderProfessores();
-//     }
-// }
-
-function deleteProfessor(index){
-    if(confirm('Tem certeza que deseja excluir este professor?')){
-        fetch('http://localhost:3000/professores'+index,
-        {
-            method:'DELETE',
-            headers:{"Content-Type":"application/json"},
-        })
-        .then(response => response.json())
-        .then(dados =>{
-            console.log(dados)
-        })
-    renderProfessores();
-    }
-}
-
+renderProfessores();
